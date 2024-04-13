@@ -8,6 +8,7 @@ import com.fullstack.education.labpcp.datasource.repository.PapelRepository;
 import com.fullstack.education.labpcp.datasource.repository.UsuarioRepository;
 import com.fullstack.education.labpcp.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequiredArgsConstructor
 public class UsuarioServiceImpl implements UsuarioService {
 
+    private final BCryptPasswordEncoder bCryptEncoder;
     private final UsuarioRepository usuarioRepository;
     private final PapelRepository papelRepository;
 
@@ -27,7 +29,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         UsuarioEntity usuario = new UsuarioEntity();
         usuario.setLogin(cadastroUsuarioRequest.login());
-        usuario.setSenha(cadastroUsuarioRequest.senha());
+        usuario.setSenha(bCryptEncoder.encode(cadastroUsuarioRequest.senha()));
         usuario.setPapel(papelRepository.findByNome(cadastroUsuarioRequest.papel()).orElseThrow(() -> new RuntimeException("Perfil inválido")));
 
         usuarioRepository.save(usuario);
