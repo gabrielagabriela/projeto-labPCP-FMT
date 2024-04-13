@@ -10,6 +10,7 @@ public class PapelEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "papel_id")
     private Long id;
 
     private String nome;
