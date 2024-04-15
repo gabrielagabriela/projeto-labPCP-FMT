@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/login")
+//@RequestMapping("/login")
 public class TokenController {
 
     private final TokenService tokenService;
     private static long TEMPO_EXPIRACAO = 36000L;
 
-    @PostMapping
+    @PostMapping("/login")
     public ResponseEntity<LoginResponse> gerarTokenLogin(@RequestBody LoginRequest loginRequest){
 
         LoginResponse loginResponse = tokenService.tokenLogin(loginRequest);
