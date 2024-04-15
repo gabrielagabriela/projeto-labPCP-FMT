@@ -6,6 +6,7 @@ import com.fullstack.education.labpcp.datasource.entity.UsuarioEntity;
 import com.fullstack.education.labpcp.datasource.repository.UsuarioRepository;
 import com.fullstack.education.labpcp.service.TokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -18,6 +19,7 @@ import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TokenServiceImpl implements TokenService {
 
     private final BCryptPasswordEncoder bCryptEncoder;
@@ -30,7 +32,7 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public LoginResponse tokenLogin(@RequestBody LoginRequest loginRequest) {
 
-        UsuarioEntity usuarioEntity = usuarioRepository.findByLogin(loginRequest.login()).orElseThrow(() -> {return new RuntimeException("Este login não existe!");});
+        UsuarioEntity usuarioEntity = usuarioRepository.findByLogin(loginRequest.login()).orElseThrow(() -> {log.error("Erro, usuário não existe"); return new RuntimeException("Este login não existe!");});
 
 
         if(!usuarioEntity.senhaCorreta(loginRequest, bCryptEncoder)){
@@ -57,6 +59,8 @@ public class TokenServiceImpl implements TokenService {
         return new LoginResponse(valorJWT, TEMPO_EXPIRACAO);
     }
 
+
+    @Override
     public String buscaCampo(String token, String claim) {
         return jwtDencoder
                 .decode(token)
@@ -64,4 +68,7 @@ public class TokenServiceImpl implements TokenService {
                 .get(claim)
                 .toString();
     }
+
+
+
 }
