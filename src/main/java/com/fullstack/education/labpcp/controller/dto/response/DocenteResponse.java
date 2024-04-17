@@ -6,6 +6,7 @@ public record DocenteResponse(
         Long id_docente,
         String nome,
         LocalDate data_entrada,
+
         String login
 ) {
 }
