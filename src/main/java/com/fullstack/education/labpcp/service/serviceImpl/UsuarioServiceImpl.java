@@ -48,6 +48,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioRepository.save(usuario);
 
         return new CadastroUsuarioResponse(usuario.getId(), usuario.getLogin());
+
     }
 
     @Override
