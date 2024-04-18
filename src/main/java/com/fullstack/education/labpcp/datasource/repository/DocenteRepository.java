@@ -4,6 +4,7 @@ import com.fullstack.education.labpcp.datasource.entity.DocenteEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DocenteRepository extends JpaRepository<DocenteEntity, Long> {
 
@@ -12,5 +13,12 @@ public interface DocenteRepository extends JpaRepository<DocenteEntity, Long> {
     boolean existsByIdAndLoginPapelNome(Long docenteId, String nomePapel);
 
     List<DocenteEntity> findAllByLoginPapelNome(String nomePapel);
+
+    // boolean existsByLoginAndPapelNome(String login, String nomePapel);
+    //boolean existsByNomeAndPapelNome(String nome, String nomePapel);
+    boolean existsByNomeAndLoginPapelNome(String nome, String nomePapel);
+
+
+    Optional<DocenteEntity> findByNome(String nome);
 
 }
