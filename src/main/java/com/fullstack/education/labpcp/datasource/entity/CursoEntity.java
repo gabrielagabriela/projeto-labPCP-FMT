@@ -17,10 +17,10 @@ public class CursoEntity {
 
     /*
      @OneToMany(mappedBy = "curso") // nome do atributo curso na classe Turma
-    private List<Turma> turmas;
+    private List<TurmaEntity> turmas;
 
     @OneToMany(mappedBy = "curso")
-    private List<Materia> materias;
+    private List<MateriaEntity> materias;
      */
 
 }
