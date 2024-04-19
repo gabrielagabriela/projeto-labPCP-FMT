@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 
+
 @Data
 @Entity
 @Table(name = "docente")
@@ -24,3 +25,5 @@ public class DocenteEntity {
     private UsuarioEntity login;
 
 }
+
+

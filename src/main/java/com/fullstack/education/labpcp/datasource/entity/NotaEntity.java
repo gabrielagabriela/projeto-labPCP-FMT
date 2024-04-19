@@ -3,30 +3,33 @@ package com.fullstack.education.labpcp.datasource.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 @Entity
-@Table(name = "turma")
-public class TurmaEntity {
+@Table(name = "nota")
+public class NotaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "turma_id")
+    @Column(name = "nota_id")
     private Long id;
 
-    private String nome;
+    @ManyToOne
+    @JoinColumn(name = "aluno_id")
+    private AlunoEntity nomeAluno;
 
     @ManyToOne
     @JoinColumn(name = "professor_id")
     private DocenteEntity nomeProfessor;
 
     @ManyToOne
-    @JoinColumn(name = "curso_id")
-    private CursoEntity nomeCurso;
+    @JoinColumn(name = "materia_id")
+    private MateriaEntity nomeMateria;
 
-    /*
-     @OneToMany(mappedBy = "turma") // nome do atributo turma na classe aluno
-    private List<AlunoEntity> alunos;
-    */
+    private double valor;
+
+    private LocalDate data;
 
 
 }
