@@ -1,6 +1,7 @@
 package com.fullstack.education.labpcp.service;
 
 import com.fullstack.education.labpcp.controller.dto.request.CursoRequest;
+import com.fullstack.education.labpcp.controller.dto.response.CursoListaMateriaResponse;
 import com.fullstack.education.labpcp.controller.dto.response.CursoResponse;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -13,5 +14,7 @@ public interface CursoService {
     CursoResponse atualizarCurso(Long id, @RequestBody CursoRequest cursoRequest, String token);
     void excluirCurso(Long id, String token);
     List<CursoResponse> listarTodosCursos(String token);
+
+    List<CursoListaMateriaResponse> listarMateriasPorCurso(Long id, String token);
 }
 

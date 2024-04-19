@@ -1,6 +1,7 @@
 package com.fullstack.education.labpcp.controller;
 
 import com.fullstack.education.labpcp.controller.dto.request.CursoRequest;
+import com.fullstack.education.labpcp.controller.dto.response.CursoListaMateriaResponse;
 import com.fullstack.education.labpcp.controller.dto.response.CursoResponse;
 import com.fullstack.education.labpcp.service.CursoService;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,11 @@ public class CursoController {
     @GetMapping()
     public ResponseEntity<List<CursoResponse>> listarCursos(@RequestHeader(name = "Authorization" ) String token){
         return ResponseEntity.status(HttpStatus.OK).body(cursoService.listarTodosCursos( token.substring(7)));
+    }
+
+    @GetMapping("{id}/materias")
+    public ResponseEntity<List<CursoListaMateriaResponse>> listaMateriasPorCurso(@PathVariable Long id,@RequestHeader(name = "Authorization" ) String token ){
+        return ResponseEntity.status(HttpStatus.OK).body(cursoService.listarMateriasPorCurso(id, token.substring(7)));
     }
 }
 
