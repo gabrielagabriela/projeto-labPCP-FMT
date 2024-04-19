@@ -1,14 +1,17 @@
 package com.fullstack.education.labpcp.service.serviceImpl;
 
 import com.fullstack.education.labpcp.controller.dto.request.CursoRequest;
+import com.fullstack.education.labpcp.controller.dto.response.CursoListaMateriaResponse;
 import com.fullstack.education.labpcp.controller.dto.response.CursoResponse;
 import com.fullstack.education.labpcp.datasource.entity.CursoEntity;
+import com.fullstack.education.labpcp.datasource.entity.MateriaEntity;
 import com.fullstack.education.labpcp.datasource.repository.CursoRepository;
 import com.fullstack.education.labpcp.service.CursoService;
 import com.fullstack.education.labpcp.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -80,4 +83,21 @@ public class CursoServiceImpl implements CursoService {
                 d -> new CursoResponse(d.getId(), d.getNome())
         ).toList();
     }
+
+    @Override
+    public List<CursoListaMateriaResponse> listarMateriasPorCurso(Long id, String token) {
+
+        papelUsuarioAcessoPermitido(token);
+        CursoEntity cursoPesquisado = cursoPorId(id);
+
+        List<CursoListaMateriaResponse> resposta = new ArrayList<>();
+        List<String> materias = new ArrayList<>();
+        for (MateriaEntity materia : cursoPesquisado.getMaterias()) {
+            materias.add(materia.getNome());
+        }
+        resposta.add(new CursoListaMateriaResponse(cursoPesquisado.getId(), cursoPesquisado.getNome(), materias));
+
+        return resposta;
+    }
 }
+

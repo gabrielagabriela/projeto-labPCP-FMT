@@ -3,6 +3,8 @@ package com.fullstack.education.labpcp.datasource.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Entity
 @Table(name = "curso")
@@ -18,9 +20,9 @@ public class CursoEntity {
     /*
      @OneToMany(mappedBy = "curso") // nome do atributo curso na classe Turma
     private List<TurmaEntity> turmas;
-
-    @OneToMany(mappedBy = "curso")
+*/
+    @OneToMany(mappedBy = "nomeCurso", fetch = FetchType.EAGER)
     private List<MateriaEntity> materias;
-     */
+
 
 }
