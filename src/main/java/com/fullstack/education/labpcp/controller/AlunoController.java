@@ -3,6 +3,7 @@ package com.fullstack.education.labpcp.controller;
 import com.fullstack.education.labpcp.controller.dto.request.AlunoRequest;
 import com.fullstack.education.labpcp.controller.dto.response.AlunoResponse;
 import com.fullstack.education.labpcp.controller.dto.response.NotaResponse;
+import com.fullstack.education.labpcp.controller.dto.response.PontuacaoTotalAlunoResponse;
 import com.fullstack.education.labpcp.service.AlunoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -48,6 +49,11 @@ public class AlunoController {
     @GetMapping("{id}/notas")
     public ResponseEntity<List<NotaResponse>> listarNotasPorAluno(@PathVariable Long id, @RequestHeader(name = "Authorization" ) String token){
         return ResponseEntity.status(HttpStatus.OK).body(alunoService.listarNotasPorAluno(id, token.substring(7)));
+    }
+
+    @GetMapping("{id}/pontuacao")
+    public ResponseEntity<PontuacaoTotalAlunoResponse> pontuacaoTotalDoAluno(@PathVariable Long id, @RequestHeader(name = "Authorization" ) String token){
+        return ResponseEntity.status(HttpStatus.OK).body(alunoService.pontuacaoTotalAluno(id, token.substring(7)));
     }
 }
 

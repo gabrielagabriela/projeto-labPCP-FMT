@@ -3,6 +3,7 @@ package com.fullstack.education.labpcp.service.serviceImpl;
 import com.fullstack.education.labpcp.controller.dto.request.AlunoRequest;
 import com.fullstack.education.labpcp.controller.dto.response.AlunoResponse;
 import com.fullstack.education.labpcp.controller.dto.response.NotaResponse;
+import com.fullstack.education.labpcp.controller.dto.response.PontuacaoTotalAlunoResponse;
 import com.fullstack.education.labpcp.datasource.entity.AlunoEntity;
 import com.fullstack.education.labpcp.datasource.entity.NotaEntity;
 import com.fullstack.education.labpcp.datasource.repository.AlunoRepository;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.text.DecimalFormat;
 
 @Service
 @RequiredArgsConstructor
@@ -135,6 +137,34 @@ public class AlunoServiceImpl implements AlunoService {
         return notas.stream().map(
                 n -> new NotaResponse(n.getId(), n.getNomeAluno().getNome(), n.getNomeProfessor().getNome(), n.getNomeMateria().getNome(), n.getValor(), n.getData())
         ).toList();
+    }
+
+    @Override
+    public PontuacaoTotalAlunoResponse pontuacaoTotalAluno(Long id, String token){
+
+        String nomePapel = tokenService.buscaCampo(token, "scope");
+
+        if(Objects.equals(nomePapel, "RECRUITER") || Objects.equals(nomePapel, "PROFESSOR")){
+            throw new RuntimeException("Apenas administradores, pedagogos e o aluno podem acessar a pontuação do aluno!");
+        }
+
+        AlunoEntity alunoPesquisado = alunoPorId(id);
+
+        if(nomePapel.equals("ALUNO") ) {
+            String subDoToken = tokenService.buscaCampo(token, "sub");
+            Long idAlunoPesquisado = alunoPesquisado.getLogin().getId();
+
+            if (!subDoToken.equals(String.valueOf(idAlunoPesquisado))) {
+                throw new RuntimeException("O ID fornecido não corresponde ao aluno buscando sua pontuação total!");
+            }
+
+        }
+
+        double somaDasNotas = alunoPesquisado.getNotas().stream().mapToDouble(NotaEntity::getValor).sum();
+        double quantidadeMateria = alunoPesquisado.getNomeTurma().getNomeCurso().getMaterias().size();
+        double pontuacaoTotalDoAluno = somaDasNotas/quantidadeMateria * 10;
+
+        return new PontuacaoTotalAlunoResponse(alunoPesquisado.getId(), alunoPesquisado.getNome(), pontuacaoTotalDoAluno);
     }
 
 }
