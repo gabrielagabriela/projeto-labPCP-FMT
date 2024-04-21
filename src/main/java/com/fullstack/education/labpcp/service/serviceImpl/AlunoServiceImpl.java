@@ -2,7 +2,9 @@ package com.fullstack.education.labpcp.service.serviceImpl;
 
 import com.fullstack.education.labpcp.controller.dto.request.AlunoRequest;
 import com.fullstack.education.labpcp.controller.dto.response.AlunoResponse;
+import com.fullstack.education.labpcp.controller.dto.response.NotaResponse;
 import com.fullstack.education.labpcp.datasource.entity.AlunoEntity;
+import com.fullstack.education.labpcp.datasource.entity.NotaEntity;
 import com.fullstack.education.labpcp.datasource.repository.AlunoRepository;
 import com.fullstack.education.labpcp.datasource.repository.TurmaRepository;
 import com.fullstack.education.labpcp.datasource.repository.UsuarioRepository;
@@ -23,6 +25,7 @@ public class AlunoServiceImpl implements AlunoService {
     private final TokenService tokenService;
     private final UsuarioRepository usuarioRepository;
     private final TurmaRepository turmaRepository;
+
 
     public void papelUsuarioAcessoPermitido(String token){
 
@@ -107,5 +110,32 @@ public class AlunoServiceImpl implements AlunoService {
         }).toList();
 
     }
+    @Override
+    public List<NotaResponse> listarNotasPorAluno(Long id, String token){
+
+        String nomePapel = tokenService.buscaCampo(token, "scope");
+
+        if(Objects.equals(nomePapel, "RECRUITER") || Objects.equals(nomePapel, "PROFESSOR")){
+            throw new RuntimeException("Apenas administradores, pedagogos e o aluno podem acessar a lista de notas de um aluno!");
+        }
+
+        AlunoEntity alunoPesquisado = alunoPorId(id);
+
+
+        if(nomePapel.equals("ALUNO") ) {
+            String subDoToken = tokenService.buscaCampo(token, "sub");
+            Long idAlunoPesquisado = alunoPesquisado.getLogin().getId();
+
+            if (!subDoToken.equals(String.valueOf(idAlunoPesquisado))) {
+                throw new RuntimeException("O ID fornecido não corresponde ao aluno buscando sua lista de notas!");
+            }
+
+        }
+        List<NotaEntity> notas = alunoPesquisado.getNotas();
+        return notas.stream().map(
+                n -> new NotaResponse(n.getId(), n.getNomeAluno().getNome(), n.getNomeProfessor().getNome(), n.getNomeMateria().getNome(), n.getValor(), n.getData())
+        ).toList();
+    }
+
 }
 

@@ -18,6 +18,9 @@ public interface DocenteRepository extends JpaRepository<DocenteEntity, Long> {
     //boolean existsByNomeAndPapelNome(String nome, String nomePapel);
     boolean existsByNomeAndLoginPapelNome(String nome, String nomePapel);
 
+    //boolean existsByNomeAndTurmaNomeProfessorNome(String nomeProfessor, String nomeProfessorTurma);
+
+    //boolean usuarioProfessor = docenteRepository.existsByNomeAndLoginPapelNome(turmaRequest.nomeProfessor(), "PROFESSOR");
 
     Optional<DocenteEntity> findByNome(String nome);
 
