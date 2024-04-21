@@ -17,10 +17,9 @@ public class CursoEntity {
 
     private String nome;
 
-    /*
-     @OneToMany(mappedBy = "curso") // nome do atributo curso na classe Turma
+    @OneToMany(mappedBy = "nomeCurso", fetch = FetchType.EAGER)
     private List<TurmaEntity> turmas;
-*/
+
     @OneToMany(mappedBy = "nomeCurso", fetch = FetchType.EAGER)
     private List<MateriaEntity> materias;
 
