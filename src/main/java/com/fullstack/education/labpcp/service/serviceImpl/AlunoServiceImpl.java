@@ -16,6 +16,7 @@ import com.fullstack.education.labpcp.infra.exception.UsuarioIncompativelExcepti
 import com.fullstack.education.labpcp.service.AlunoService;
 import com.fullstack.education.labpcp.service.TokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AlunoServiceImpl implements AlunoService {
 
 
@@ -79,6 +81,7 @@ public class AlunoServiceImpl implements AlunoService {
 
         alunoRepository.save(aluno);
 
+        log.info("Aluno criado com sucesso!");
         return new AlunoResponse(aluno.getId(), aluno.getNome(), aluno.getData_nascimento(), aluno.getLogin().getLogin(), aluno.getNomeTurma().getNome());
 
     }
@@ -93,6 +96,7 @@ public class AlunoServiceImpl implements AlunoService {
     public AlunoResponse obterAlunoPorId(Long id, String token) {
         papelUsuarioAcessoPermitido(token);
         AlunoEntity alunoPesquisado = alunoPorId(id);
+        log.info("Aluno obtido por Id com sucesso!");
         return new AlunoResponse(alunoPesquisado.getId(), alunoPesquisado.getNome(), alunoPesquisado.getData_nascimento(), alunoPesquisado.getLogin().getLogin(), alunoPesquisado.getNomeTurma().getNome());
     }
 
@@ -135,6 +139,7 @@ public class AlunoServiceImpl implements AlunoService {
 
         alunoRepository.save(alunoPesquisado);
 
+        log.info("Aluno atualizado com sucesso!");
         return new AlunoResponse(alunoPesquisado.getId(), alunoPesquisado.getNome(), alunoPesquisado.getData_nascimento(), alunoPesquisado.getLogin().getLogin(), alunoPesquisado.getNomeTurma().getNome());
     }
 
@@ -147,6 +152,7 @@ public class AlunoServiceImpl implements AlunoService {
         }
 
         AlunoEntity alunoPesquisado = alunoPorId(id);
+        log.info("Aluno excluído");
         alunoRepository.delete(alunoPesquisado);
 
     }
@@ -158,6 +164,7 @@ public class AlunoServiceImpl implements AlunoService {
         return alunoRepository.findAll().stream().map(aluno -> {
             String nomeTurma = aluno.getNomeTurma() != null ? aluno.getNomeTurma().getNome() : null;
 
+            log.info("Retorno de lista de alunos com sucesso!");
             return new AlunoResponse(aluno.getId(), aluno.getNome(), aluno.getData_nascimento(), aluno.getLogin().getLogin(), nomeTurma);
         }).toList();
 
@@ -185,6 +192,7 @@ public class AlunoServiceImpl implements AlunoService {
 
         }
         List<NotaEntity> notas = alunoPesquisado.getNotas();
+        log.info("Retorno das notas do aluno com sucesso!");
         return notas.stream().map(
                 n -> new NotaResponse(n.getId(), n.getNomeAluno().getNome(), n.getNomeProfessor().getNome(), n.getNomeMateria().getNome(), n.getValor(), n.getData())
         ).toList();
@@ -215,6 +223,7 @@ public class AlunoServiceImpl implements AlunoService {
         double quantidadeMateria = alunoPesquisado.getNomeTurma().getNomeCurso().getMaterias().size();
         double pontuacaoTotalDoAluno = somaDasNotas / quantidadeMateria * 10;
 
+        log.info("Retornando a pontuação do aluno por ID com sucesso!");
         return new PontuacaoTotalAlunoResponse(alunoPesquisado.getId(), alunoPesquisado.getNome(), pontuacaoTotalDoAluno);
     }
 

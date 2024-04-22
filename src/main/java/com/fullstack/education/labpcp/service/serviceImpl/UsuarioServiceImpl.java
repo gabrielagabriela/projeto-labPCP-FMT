@@ -13,6 +13,7 @@ import com.fullstack.education.labpcp.infra.exception.RegistroExistenteException
 import com.fullstack.education.labpcp.service.TokenService;
 import com.fullstack.education.labpcp.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +23,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UsuarioServiceImpl implements UsuarioService {
 
     private final BCryptPasswordEncoder bCryptEncoder;
@@ -32,12 +34,12 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public CadastroUsuarioResponse cadastrarUsuario(@RequestBody CadastroUsuarioRequest cadastroUsuarioRequest, String token) {
 
-        if(cadastroUsuarioRequest.login() == null || cadastroUsuarioRequest.senha() == null || cadastroUsuarioRequest.papel() == null){
+        if (cadastroUsuarioRequest.login() == null || cadastroUsuarioRequest.senha() == null || cadastroUsuarioRequest.papel() == null) {
             throw new CampoAusenteException("Os campos login, senha e papel são obrigatórios");
         }
 
         String nomePapel = tokenService.buscaCampo(token, "scope");
-        if(!Objects.equals(nomePapel, "ADM")){
+        if (!Objects.equals(nomePapel, "ADM")) {
             throw new AcessoNaoAutorizadoException("Apenas administrador pode realizar o cadastro de novos usuários");
         }
 
@@ -55,6 +57,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         usuarioRepository.save(usuario);
 
+        log.info("Cadastro de um usuário no sistema -> com sucesso");
         return new CadastroUsuarioResponse(usuario.getId(), usuario.getLogin());
     }
 
@@ -62,13 +65,13 @@ public class UsuarioServiceImpl implements UsuarioService {
     public boolean existeUsuariosCadastrados() {
         return usuarioRepository.count() > 0;
     }
+
     @Override
-    public void cadastrarUsuarioPreDefinido(String login, String senha, String papel){
+    public void cadastrarUsuarioPreDefinido(String login, String senha, String papel) {
         UsuarioEntity usuario = new UsuarioEntity();
         usuario.setLogin(login);
         usuario.setSenha(bCryptEncoder.encode(senha));
         usuario.setPapel(papelRepository.findByNome(papel).orElseThrow(() -> new RuntimeException("Perfil inválido")));
         usuarioRepository.save(usuario);
     }
-
 }

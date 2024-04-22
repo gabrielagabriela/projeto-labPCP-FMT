@@ -36,14 +36,14 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public LoginResponse tokenLogin(@RequestBody LoginRequest loginRequest) {
 
-        if(loginRequest.login() == null || loginRequest.senha() == null){
+        if (loginRequest.login() == null || loginRequest.senha() == null) {
             throw new CampoAusenteException("Os campos login e senha são obrigatórios");
         }
 
-        UsuarioEntity usuarioEntity = usuarioRepository.findByLogin(loginRequest.login()).orElseThrow(() -> {log.error("Erro, usuário não existe"); return new NotFoundException("Este login não existe!");});
+        UsuarioEntity usuarioEntity = usuarioRepository.findByLogin(loginRequest.login().toLowerCase()).orElseThrow(() -> new NotFoundException("Não há registro com este login"));
 
 
-        if(!usuarioEntity.senhaCorreta(loginRequest, bCryptEncoder)){
+        if (!usuarioEntity.senhaCorreta(loginRequest, bCryptEncoder)) {
             throw new BadRequestException("Erro! Senha incorreta, tente novamente.");
         }
 
@@ -64,6 +64,7 @@ public class TokenServiceImpl implements TokenService {
                 )
                 .getTokenValue();
 
+        log.info("Usuário logado-> Envio de token com sucesso");
         return new LoginResponse(valorJWT, TEMPO_EXPIRACAO);
     }
 
@@ -76,7 +77,6 @@ public class TokenServiceImpl implements TokenService {
                 .get(claim)
                 .toString();
     }
-
 
 
 }

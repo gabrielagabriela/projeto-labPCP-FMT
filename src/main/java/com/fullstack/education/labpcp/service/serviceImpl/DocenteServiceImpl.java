@@ -10,6 +10,7 @@ import com.fullstack.education.labpcp.infra.exception.*;
 import com.fullstack.education.labpcp.service.DocenteService;
 import com.fullstack.education.labpcp.service.TokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DocenteServiceImpl implements DocenteService {
 
     private final DocenteRepository docenteRepository;
@@ -89,6 +91,7 @@ public class DocenteServiceImpl implements DocenteService {
         docente.setLogin(usuarioRepository.findByLogin(docenteRequest.login().toLowerCase()).orElseThrow(() -> new NotFoundException("Login inexistente")));
         docenteRepository.save(docente);
 
+        log.info("Criação de um docente com sucesso!");
         return new DocenteResponse(docente.getId(), docente.getNome(), docente.getData_entrada(), docente.getLogin().getLogin());
 
     }
@@ -101,16 +104,14 @@ public class DocenteServiceImpl implements DocenteService {
     @Override
     public DocenteResponse obterDocentePorId(Long id, String token) {
 
-        // verificar se tem acesso
         String nomePapel = papelUsuarioCadastrante(token);
 
-        //DocenteEntity docentePesquisado = docenteRepository.findById(id).orElseThrow(() -> new RuntimeException("Id não correspondente a nenhum docente cadastrado"));
         DocenteEntity docentePesquisado = docentePorId(id);
 
-        // descobrir se o id é de prof para so deixar o nomePapel prof usar esse
         boolean usuarioProfessor = docenteRepository.existsByIdAndLoginPapelNome(id, "PROFESSOR");
         usuarioAcessaApenasProfessor(nomePapel, usuarioProfessor);
 
+        log.info("Busca por um docente pelo seu ID");
         return new DocenteResponse(docentePesquisado.getId(), docentePesquisado.getNome(), docentePesquisado.getData_entrada(), docentePesquisado.getLogin().getLogin());
     }
 
@@ -127,7 +128,6 @@ public class DocenteServiceImpl implements DocenteService {
 
         boolean usuarioProfessor = docenteRepository.existsByIdAndLoginPapelNome(id, "PROFESSOR");
         usuarioAcessaApenasProfessor(nomePapel, usuarioProfessor);
-
 
         boolean usuarioAluno = usuarioRepository.existsByLoginAndPapelNome(docenteRequest.login().toLowerCase(), "ALUNO");
         if (usuarioAluno) {
@@ -155,8 +155,8 @@ public class DocenteServiceImpl implements DocenteService {
 
         docenteRepository.save(docentePesquisado);
 
+        log.info("Atualização dos dados de um docente pelo seu ID");
         return new DocenteResponse(docentePesquisado.getId(), docentePesquisado.getNome(), docentePesquisado.getData_entrada(), docentePesquisado.getLogin().getLogin());
-
 
     }
 
@@ -171,11 +171,11 @@ public class DocenteServiceImpl implements DocenteService {
         DocenteEntity docentePesquisado = docentePorId(id);
         String nomeDocentePesquisado = docentePesquisado.getNome();
         boolean professorEmUmaTurma = turmaRepository.existsByNomeProfessorNome(nomeDocentePesquisado);
-        if(professorEmUmaTurma){
+        if (professorEmUmaTurma) {
             throw new BadRequestException("Este professor está associado a uma turma, antes de deleta-lo indique outro professor a turma");
         }
+        log.info("Exclusão de um docente pelo seu ID");
         docenteRepository.delete(docentePesquisado);
-
     }
 
     @Override
@@ -187,11 +187,13 @@ public class DocenteServiceImpl implements DocenteService {
 
         if (!Objects.equals(nomePapel, "ADM")) {
 
+            log.info("Busca da lista com todos os docentes de papel 'professor' cadastrados");
             return docentes.stream().map(
                     d -> new DocenteResponse(d.getId(), d.getNome(), d.getData_entrada(), d.getLogin().getLogin())
             ).toList();
         }
 
+        log.info("Busca da lista com todos os docentes cadastrados");
         return docenteRepository.findAll().stream().map(
                 d -> new DocenteResponse(d.getId(), d.getNome(), d.getData_entrada(), d.getLogin().getLogin())
         ).toList();

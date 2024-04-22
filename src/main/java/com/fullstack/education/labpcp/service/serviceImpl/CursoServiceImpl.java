@@ -11,6 +11,7 @@ import com.fullstack.education.labpcp.infra.exception.*;
 import com.fullstack.education.labpcp.service.CursoService;
 import com.fullstack.education.labpcp.service.TokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CursoServiceImpl implements CursoService {
 
     private final CursoRepository cursoRepository;
@@ -53,6 +55,7 @@ public class CursoServiceImpl implements CursoService {
         CursoEntity curso = new CursoEntity();
         curso.setNome(cursoRequest.nome().toUpperCase());
         cursoRepository.save(curso);
+        log.info("Curso criado -> com sucesso");
         return new CursoResponse(curso.getId(), curso.getNome());
     }
 
@@ -65,6 +68,7 @@ public class CursoServiceImpl implements CursoService {
     public CursoResponse obterCursoPorId(Long id, String token) {
         papelUsuarioAcessoPermitido(token);
         CursoEntity cursoPesquisado = cursoPorId(id);
+        log.info("Curso obtido por ID -> com sucesso");
         return new CursoResponse(cursoPesquisado.getId(), cursoPesquisado.getNome());
     }
 
@@ -78,7 +82,7 @@ public class CursoServiceImpl implements CursoService {
         }
         CursoEntity cursoPesquisado = cursoPorId(id);
 
-        if(!cursoPesquisado.getNome().equalsIgnoreCase(cursoRequest.nome().toUpperCase())){
+        if (!cursoPesquisado.getNome().equalsIgnoreCase(cursoRequest.nome().toUpperCase())) {
             Optional<CursoEntity> cursoExistenteOptional = cursoRepository.findByNome(cursoRequest.nome().toUpperCase());
             if (cursoExistenteOptional.isPresent()) {
                 throw new RegistroExistenteException("Já existe curso cadastrado com este nome!");
@@ -88,6 +92,7 @@ public class CursoServiceImpl implements CursoService {
         cursoPesquisado.setId(id);
         cursoPesquisado.setNome(cursoRequest.nome().toUpperCase());
         cursoRepository.save(cursoPesquisado);
+        log.info("Curso atualizado por ID -> com sucesso");
         return new CursoResponse(cursoPesquisado.getId(), cursoPesquisado.getNome());
     }
 
@@ -103,9 +108,10 @@ public class CursoServiceImpl implements CursoService {
         CursoEntity cursoPesquisado = cursoPorId(id);
         String nomeCursoPesquisado = cursoPesquisado.getNome();
         boolean cursoAssociadoAUmaTurma = turmaRepository.existsByNomeCursoNome(nomeCursoPesquisado);
-        if(cursoAssociadoAUmaTurma){
+        if (cursoAssociadoAUmaTurma) {
             throw new BadRequestException("Este curso está associado a pelo menos uma turma, indique outro curso a turma antes de deleta-lo!");
         }
+        log.info("Curso excluido por ID");
         cursoRepository.delete(cursoPesquisado);
 
     }
@@ -113,6 +119,7 @@ public class CursoServiceImpl implements CursoService {
     @Override
     public List<CursoResponse> listarTodosCursos(String token) {
         papelUsuarioAcessoPermitido(token);
+        log.info("Busca de Lista com todos os cursos cadastrados");
         return cursoRepository.findAll().stream().map(
                 d -> new CursoResponse(d.getId(), d.getNome())
         ).toList();
@@ -131,6 +138,7 @@ public class CursoServiceImpl implements CursoService {
         }
         resposta.add(new CursoListaMateriaResponse(cursoPesquisado.getId(), cursoPesquisado.getNome(), materias));
 
+        log.info("Busca de Lista de matérias de um curso por ID");
         return resposta;
     }
 }
