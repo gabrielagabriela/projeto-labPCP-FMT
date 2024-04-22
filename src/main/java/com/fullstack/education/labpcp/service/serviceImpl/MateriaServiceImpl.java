@@ -12,6 +12,7 @@ import com.fullstack.education.labpcp.infra.exception.RegistroExistenteException
 import com.fullstack.education.labpcp.service.TokenService;
 import com.fullstack.education.labpcp.service.MateriaService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MateriaServiceImpl implements MateriaService {
 
     private final MateriaRepository materiaRepository;
@@ -56,6 +58,7 @@ public class MateriaServiceImpl implements MateriaService {
         materia.setNomeCurso(cursoRepository.findByNome(materiaRequest.nomeCurso().toUpperCase()).orElseThrow(() -> new NotFoundException("Não há curso cadastrado com esse nome")));
         materiaRepository.save(materia);
 
+        log.info("Criação de uma matéria com sucesso");
         return new MateriaResponse(materia.getId(), materia.getNome(), materia.getNomeCurso().getNome());
     }
 
@@ -68,6 +71,7 @@ public class MateriaServiceImpl implements MateriaService {
     public MateriaResponse obterMateriaPorId(Long id, String token) {
         papelUsuarioAcessoPermitido(token);
         MateriaEntity materiaPesquisada = materiaPorId(id);
+        log.info("Busca de uma matéria pelo seu ID");
         return new MateriaResponse(materiaPesquisada.getId(), materiaPesquisada.getNome(), materiaPesquisada.getNomeCurso().getNome());
     }
 
@@ -97,6 +101,7 @@ public class MateriaServiceImpl implements MateriaService {
 
         materiaRepository.save(materiaPesquisada);
 
+        log.info("Atualização dos campos de uma matéria pelo seu ID");
         return new MateriaResponse(materiaPesquisada.getId(), materiaPesquisada.getNome(), materiaPesquisada.getNomeCurso().getNome());
     }
 
@@ -106,6 +111,7 @@ public class MateriaServiceImpl implements MateriaService {
         papelUsuarioAcessoPermitido(token);
 
         MateriaEntity materiaPesquisada = materiaPorId(id);
+        log.info("Exclusão de uma matéria pelo seu ID - com sucesso!");
         materiaRepository.delete(materiaPesquisada);
     }
 
@@ -114,6 +120,7 @@ public class MateriaServiceImpl implements MateriaService {
 
         papelUsuarioAcessoPermitido(token);
 
+        log.info("Busca da lista com todas as matérias cadastradas no sistema");
         return materiaRepository.findAll().stream().map(materia -> {
             String nomeCurso = materia.getNomeCurso() != null ? materia.getNomeCurso().getNome() : null;
 

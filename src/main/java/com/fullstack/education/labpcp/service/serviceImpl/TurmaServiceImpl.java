@@ -11,6 +11,7 @@ import com.fullstack.education.labpcp.infra.exception.*;
 import com.fullstack.education.labpcp.service.TurmaService;
 import com.fullstack.education.labpcp.service.TokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TurmaServiceImpl implements TurmaService {
 
     private final TurmaRepository turmaRepository;
@@ -27,7 +29,6 @@ public class TurmaServiceImpl implements TurmaService {
     private final CursoRepository cursoRepository;
 
     public void papelUsuarioAcessoPermitido(String token) {
-
 
         String nomePapel = tokenService.buscaCampo(token, "scope");
 
@@ -44,7 +45,6 @@ public class TurmaServiceImpl implements TurmaService {
         }
 
         papelUsuarioAcessoPermitido(token);
-
 
         Optional<TurmaEntity> turmaExistenteOptional = turmaRepository.findByNome(turmaRequest.nome().toUpperCase());
         if (turmaExistenteOptional.isPresent()) {
@@ -63,13 +63,13 @@ public class TurmaServiceImpl implements TurmaService {
             throw new RegistroExistenteException("O professor fornecido já está registrado em uma outra tuma");
         }
 
-
         TurmaEntity turma = new TurmaEntity();
         turma.setNome(turmaRequest.nome().toUpperCase());
         turma.setNomeProfessor(docente);
         turma.setNomeCurso(cursoRepository.findByNome(turmaRequest.nomeCurso().toUpperCase()).orElseThrow(() -> new NotFoundException("Não há curso cadastrado com este nome")));
         turmaRepository.save(turma);
 
+        log.info("Criação de uma nova turma -> cadastro com sucesso");
         return new TurmaResponse(turma.getId(), turma.getNome(), turma.getNomeProfessor().getNome(), turma.getNomeCurso().getNome());
     }
 
@@ -82,6 +82,7 @@ public class TurmaServiceImpl implements TurmaService {
     public TurmaResponse obterTurmaPorId(Long id, String token) {
         papelUsuarioAcessoPermitido(token);
         TurmaEntity turmaPesquisada = turmaPorId(id);
+        log.info("Busca de uma turma pelo seu ID");
         return new TurmaResponse(turmaPesquisada.getId(), turmaPesquisada.getNome(), turmaPesquisada.getNomeProfessor().getNome(), turmaPesquisada.getNomeCurso().getNome());
     }
 
@@ -127,6 +128,7 @@ public class TurmaServiceImpl implements TurmaService {
         turmaPesquisada.setNomeCurso(cursoRepository.findByNome(turmaRequest.nomeCurso().toUpperCase()).orElseThrow(() -> new NotFoundException("Não há curso cadastrado com esse nome")));
         turmaRepository.save(turmaPesquisada);
 
+        log.info("Atualização dos campos de uma turma pelo seu ID");
         return new TurmaResponse(turmaPesquisada.getId(), turmaPesquisada.getNome(), turmaPesquisada.getNomeProfessor().getNome(), turmaPesquisada.getNomeCurso().getNome());
     }
 
@@ -140,14 +142,16 @@ public class TurmaServiceImpl implements TurmaService {
         }
 
         TurmaEntity turmaPesquisada = turmaPorId(id);
-        turmaRepository.delete(turmaPesquisada);
 
+        log.info("Exclusão de uma turma pelo seu ID");
+        turmaRepository.delete(turmaPesquisada);
     }
 
     @Override
     public List<TurmaResponse> listarTodosTurmas(String token) {
         papelUsuarioAcessoPermitido(token);
 
+        log.info("Lista com todas as turmas cadastradas no sistema");
         return turmaRepository.findAll().stream().map(turma -> {
             String nomeProfessor = turma.getNomeProfessor() != null ? turma.getNomeProfessor().getNome() : null;
             String nomeCurso = turma.getNomeCurso() != null ? turma.getNomeCurso().getNome() : null;
@@ -155,5 +159,4 @@ public class TurmaServiceImpl implements TurmaService {
             return new TurmaResponse(turma.getId(), turma.getNome(), nomeProfessor, nomeCurso);
         }).toList();
     }
-
 }
