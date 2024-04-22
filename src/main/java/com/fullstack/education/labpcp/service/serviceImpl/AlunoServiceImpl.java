@@ -9,6 +9,10 @@ import com.fullstack.education.labpcp.datasource.entity.NotaEntity;
 import com.fullstack.education.labpcp.datasource.repository.AlunoRepository;
 import com.fullstack.education.labpcp.datasource.repository.TurmaRepository;
 import com.fullstack.education.labpcp.datasource.repository.UsuarioRepository;
+import com.fullstack.education.labpcp.infra.exception.AcessoNaoAutorizadoException;
+import com.fullstack.education.labpcp.infra.exception.NotFoundException;
+import com.fullstack.education.labpcp.infra.exception.RegistroExistenteException;
+import com.fullstack.education.labpcp.infra.exception.UsuarioIncompativelException;
 import com.fullstack.education.labpcp.service.AlunoService;
 import com.fullstack.education.labpcp.service.TokenService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.text.DecimalFormat;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,30 +34,48 @@ public class AlunoServiceImpl implements AlunoService {
     private final TurmaRepository turmaRepository;
 
 
-    public void papelUsuarioAcessoPermitido(String token){
+    public void papelUsuarioAcessoPermitido(String token) {
 
         String nomePapel = tokenService.buscaCampo(token, "scope");
 
-        if(Objects.equals(nomePapel, "RECRUITER") || Objects.equals(nomePapel, "PROFESSOR") || Objects.equals(nomePapel, "ALUNO")){
-            throw new RuntimeException("Apenas administradores e pedagogos podem acessar os endpoints de aluno!");
+        if (Objects.equals(nomePapel, "RECRUITER") || Objects.equals(nomePapel, "PROFESSOR") || Objects.equals(nomePapel, "ALUNO")) {
+            throw new AcessoNaoAutorizadoException("Apenas administradores e pedagogos podem acessar os endpoints de aluno!");
         }
     }
 
     @Override
     public AlunoResponse criarAluno(AlunoRequest alunoRequest, String token) {
 
-        papelUsuarioAcessoPermitido(token);
-
-        boolean usuarioAluno = usuarioRepository.existsByLoginAndPapelNome(alunoRequest.login(), "ALUNO");
-        if(!usuarioAluno){
-            throw new RuntimeException("Este usuário não tem papel de aluno");
+        if (alunoRequest.nome() == null || alunoRequest.data_nascimento() == null || alunoRequest.login() == null || alunoRequest.nomeTurma() == null) {
+            throw new AcessoNaoAutorizadoException("Os campos nome, data_nascimento, login e nomeTurma são obrigatórios!");
         }
 
+        papelUsuarioAcessoPermitido(token);
+
+
+        Optional<AlunoEntity> alunoExistenteOptional = alunoRepository.findByNome(alunoRequest.nome().toUpperCase());
+        if (alunoExistenteOptional.isPresent()) {
+            throw new RegistroExistenteException("Já existe aluno cadastrado com este nome!");
+        }
+
+
+        boolean usuarioAluno = usuarioRepository.existsByLoginAndPapelNome(alunoRequest.login().toLowerCase(), "ALUNO");
+        if (!usuarioAluno) {
+            throw new UsuarioIncompativelException("O login fornecido não pertence a um usuário de papel de aluno");
+        }
+
+
+        boolean loginJaUsado = alunoRepository.existsByLoginLogin(alunoRequest.login().toLowerCase());
+        if (loginJaUsado) {
+            throw new UsuarioIncompativelException("O login fornecido já foi cadastrado como aluno por um outro usuário");
+        }
+
+
         AlunoEntity aluno = new AlunoEntity();
-        aluno.setNome(alunoRequest.nome());
+        aluno.setNome(alunoRequest.nome().toUpperCase());
         aluno.setData_nascimento(alunoRequest.data_nascimento());
-        aluno.setLogin(usuarioRepository.findByLogin(alunoRequest.login()).orElseThrow(() -> new RuntimeException("Login inválido")));
-        aluno.setNomeTurma(turmaRepository.findByNome(alunoRequest.nomeTurma()).orElseThrow(() -> new RuntimeException("Não há turma cadastrada com esse nome!")));
+        aluno.setLogin(usuarioRepository.findByLogin(alunoRequest.login().toLowerCase()).orElseThrow(() -> new NotFoundException("Login inválido")));
+        aluno.setNomeTurma(turmaRepository.findByNome(alunoRequest.nomeTurma().toUpperCase()).orElseThrow(() -> new NotFoundException("Não há turma cadastrada com esse nome!")));
 
         alunoRepository.save(aluno);
 
@@ -61,39 +84,66 @@ public class AlunoServiceImpl implements AlunoService {
     }
 
 
-    public AlunoEntity alunoPorId(Long id){
-        AlunoEntity alunoPesquisado = alunoRepository.findById(id).orElseThrow(() -> new RuntimeException("Id não correspondente a nenhum aluno cadastrado"));
+    public AlunoEntity alunoPorId(Long id) {
+        AlunoEntity alunoPesquisado = alunoRepository.findById(id).orElseThrow(() -> new NotFoundException("Id não correspondente a nenhum aluno cadastrado"));
         return alunoPesquisado;
     }
+
     @Override
     public AlunoResponse obterAlunoPorId(Long id, String token) {
         papelUsuarioAcessoPermitido(token);
         AlunoEntity alunoPesquisado = alunoPorId(id);
-        return new AlunoResponse(alunoPesquisado.getId(), alunoPesquisado.getNome(),alunoPesquisado.getData_nascimento(), alunoPesquisado.getLogin().getLogin(), alunoPesquisado.getNomeTurma().getNome());
+        return new AlunoResponse(alunoPesquisado.getId(), alunoPesquisado.getNome(), alunoPesquisado.getData_nascimento(), alunoPesquisado.getLogin().getLogin(), alunoPesquisado.getNomeTurma().getNome());
     }
 
     @Override
     public AlunoResponse atualizarAluno(Long id, AlunoRequest alunoRequest, String token) {
+
+        if (alunoRequest.nome() == null || alunoRequest.data_nascimento() == null || alunoRequest.login() == null || alunoRequest.nomeTurma() == null) {
+            throw new AcessoNaoAutorizadoException("Os campos nome, data_nascimento, login e nomeTurma são obrigatórios!");
+        }
+
         papelUsuarioAcessoPermitido(token);
         AlunoEntity alunoPesquisado = alunoPorId(id);
 
+
+        if (!alunoPesquisado.getNome().equals(alunoRequest.nome().toUpperCase())) {
+            Optional<AlunoEntity> alunoExistenteOptional = alunoRepository.findByNome(alunoRequest.nome().toUpperCase());
+            if (alunoExistenteOptional.isPresent()) {
+                throw new RegistroExistenteException("Já existe aluno cadastrado com este nome!");
+            }
+        }
+
+        boolean usuarioAluno = usuarioRepository.existsByLoginAndPapelNome(alunoRequest.login().toLowerCase(), "ALUNO");
+        if (!usuarioAluno) {
+            throw new UsuarioIncompativelException("O login fornecido não pertence a um usuário de papel de aluno");
+        }
+
+
+        if (!alunoPesquisado.getLogin().getLogin().equalsIgnoreCase(alunoRequest.login().toLowerCase())) {
+            boolean loginJaUsado = alunoRepository.existsByLoginLogin(alunoRequest.login().toLowerCase());
+            if (loginJaUsado) {
+                throw new UsuarioIncompativelException("O login fornecido já foi cadastrado como aluno por um outro usuário");
+            }
+        }
+
         alunoPesquisado.setId(id);
-        alunoPesquisado.setNome(alunoRequest.nome());
+        alunoPesquisado.setNome(alunoRequest.nome().toUpperCase());
         alunoPesquisado.setData_nascimento(alunoRequest.data_nascimento());
-        alunoPesquisado.setLogin(alunoPesquisado.getLogin());
-        alunoPesquisado.setNomeTurma(alunoPesquisado.getNomeTurma());
+        alunoPesquisado.setLogin(usuarioRepository.findByLogin(alunoRequest.login().toLowerCase()).orElseThrow(() -> new NotFoundException("Login inválido")));
+        alunoPesquisado.setNomeTurma(turmaRepository.findByNome(alunoRequest.nomeTurma().toUpperCase()).orElseThrow(() -> new NotFoundException("Não há turma cadastrada com esse nome!")));
 
         alunoRepository.save(alunoPesquisado);
 
-        return new AlunoResponse(alunoPesquisado.getId(), alunoPesquisado.getNome(),alunoPesquisado.getData_nascimento(), alunoPesquisado.getLogin().getLogin(), alunoPesquisado.getNomeTurma().getNome());
+        return new AlunoResponse(alunoPesquisado.getId(), alunoPesquisado.getNome(), alunoPesquisado.getData_nascimento(), alunoPesquisado.getLogin().getLogin(), alunoPesquisado.getNomeTurma().getNome());
     }
 
     @Override
     public void excluirAluno(Long id, String token) {
 
         String nomePapel = tokenService.buscaCampo(token, "scope");
-        if(!Objects.equals(nomePapel, "ADM")){
-            throw new RuntimeException("Apenas administradores podem excluir aluno!");
+        if (!Objects.equals(nomePapel, "ADM")) {
+            throw new AcessoNaoAutorizadoException("Apenas administradores podem excluir aluno!");
         }
 
         AlunoEntity alunoPesquisado = alunoPorId(id);
@@ -112,24 +162,25 @@ public class AlunoServiceImpl implements AlunoService {
         }).toList();
 
     }
+
     @Override
-    public List<NotaResponse> listarNotasPorAluno(Long id, String token){
+    public List<NotaResponse> listarNotasPorAluno(Long id, String token) {
 
         String nomePapel = tokenService.buscaCampo(token, "scope");
 
-        if(Objects.equals(nomePapel, "RECRUITER") || Objects.equals(nomePapel, "PROFESSOR")){
-            throw new RuntimeException("Apenas administradores, pedagogos e o aluno podem acessar a lista de notas de um aluno!");
+        if (Objects.equals(nomePapel, "RECRUITER") || Objects.equals(nomePapel, "PROFESSOR")) {
+            throw new AcessoNaoAutorizadoException("Apenas administradores, pedagogos e o aluno podem acessar a lista de notas de um aluno!");
         }
 
         AlunoEntity alunoPesquisado = alunoPorId(id);
 
 
-        if(nomePapel.equals("ALUNO") ) {
+        if (nomePapel.equals("ALUNO")) {
             String subDoToken = tokenService.buscaCampo(token, "sub");
             Long idAlunoPesquisado = alunoPesquisado.getLogin().getId();
 
             if (!subDoToken.equals(String.valueOf(idAlunoPesquisado))) {
-                throw new RuntimeException("O ID fornecido não corresponde ao aluno buscando sua lista de notas!");
+                throw new UsuarioIncompativelException("O ID fornecido não corresponde ao aluno buscando sua lista de notas!");
             }
 
         }
@@ -140,29 +191,29 @@ public class AlunoServiceImpl implements AlunoService {
     }
 
     @Override
-    public PontuacaoTotalAlunoResponse pontuacaoTotalAluno(Long id, String token){
+    public PontuacaoTotalAlunoResponse pontuacaoTotalAluno(Long id, String token) {
 
         String nomePapel = tokenService.buscaCampo(token, "scope");
 
-        if(Objects.equals(nomePapel, "RECRUITER") || Objects.equals(nomePapel, "PROFESSOR")){
-            throw new RuntimeException("Apenas administradores, pedagogos e o aluno podem acessar a pontuação do aluno!");
+        if (Objects.equals(nomePapel, "RECRUITER") || Objects.equals(nomePapel, "PROFESSOR")) {
+            throw new AcessoNaoAutorizadoException("Apenas administradores, pedagogos e o aluno podem acessar a pontuação do aluno!");
         }
 
         AlunoEntity alunoPesquisado = alunoPorId(id);
 
-        if(nomePapel.equals("ALUNO") ) {
+        if (nomePapel.equals("ALUNO")) {
             String subDoToken = tokenService.buscaCampo(token, "sub");
             Long idAlunoPesquisado = alunoPesquisado.getLogin().getId();
 
             if (!subDoToken.equals(String.valueOf(idAlunoPesquisado))) {
-                throw new RuntimeException("O ID fornecido não corresponde ao aluno buscando sua pontuação total!");
+                throw new UsuarioIncompativelException("O ID fornecido não corresponde ao aluno buscando sua pontuação total!");
             }
 
         }
 
         double somaDasNotas = alunoPesquisado.getNotas().stream().mapToDouble(NotaEntity::getValor).sum();
         double quantidadeMateria = alunoPesquisado.getNomeTurma().getNomeCurso().getMaterias().size();
-        double pontuacaoTotalDoAluno = somaDasNotas/quantidadeMateria * 10;
+        double pontuacaoTotalDoAluno = somaDasNotas / quantidadeMateria * 10;
 
         return new PontuacaoTotalAlunoResponse(alunoPesquisado.getId(), alunoPesquisado.getNome(), pontuacaoTotalDoAluno);
     }

@@ -6,6 +6,7 @@ import com.fullstack.education.labpcp.datasource.entity.AlunoEntity;
 import com.fullstack.education.labpcp.datasource.entity.DocenteEntity;
 import com.fullstack.education.labpcp.datasource.entity.NotaEntity;
 import com.fullstack.education.labpcp.datasource.repository.*;
+import com.fullstack.education.labpcp.infra.exception.*;
 import com.fullstack.education.labpcp.service.NotaService;
 import com.fullstack.education.labpcp.service.TokenService;
 import lombok.RequiredArgsConstructor;
@@ -31,23 +32,28 @@ public class NotaServiceImpl implements NotaService {
         String nomePapel = tokenService.buscaCampo(token, "scope");
 
         if(Objects.equals(nomePapel, "RECRUITER") || Objects.equals(nomePapel, "PEDAGOGICO") || Objects.equals(nomePapel, "ALUNO")){
-            throw new RuntimeException("Apenas administradores e professores podem acessar os endpoints de nota!");
+            throw new AcessoNaoAutorizadoException("Apenas administradores e professores podem acessar os endpoints de nota!");
         }
     }
     @Override
     public NotaResponse criarNota(NotaRequest notaRequest, String token) {
+
+        if(notaRequest.nomeAluno() == null || notaRequest.nomeProfessor() == null || notaRequest.nomeMateria() == null || notaRequest.data() == null){
+            throw new CampoAusenteException("Os campos nomeAluno, nomeProfessor, nomeMateria, valor e data são obrigatórios!");
+        }
+
         papelUsuarioAcessoPermitido(token);
 
-        DocenteEntity docente = docenteRepository.findByNome(notaRequest.nomeProfessor()).orElseThrow(() -> new RuntimeException("Este professor não existe ou ainda não está cadastrado como um docente"));
+        DocenteEntity docente = docenteRepository.findByNome(notaRequest.nomeProfessor().toUpperCase()).orElseThrow(() -> new NotFoundException("Este professor não existe ou ainda não está cadastrado como um docente"));
 
-        AlunoEntity aluno = alunoRepository.findByNome(notaRequest.nomeAluno())
-                .orElseThrow(() -> new RuntimeException("Não há aluno cadastrado com este nome!"));
+        AlunoEntity aluno = alunoRepository.findByNome(notaRequest.nomeAluno().toUpperCase())
+                .orElseThrow(() -> new NotFoundException("Não há aluno cadastrado com este nome!"));
 
         boolean professorAssociadoTurma = turmaRepository.existsByNomeProfessorNomeAndAlunosNome(
-                notaRequest.nomeProfessor(), notaRequest.nomeAluno());
+                notaRequest.nomeProfessor().toUpperCase(), notaRequest.nomeAluno().toUpperCase());
 
         if (!professorAssociadoTurma) {
-            throw new RuntimeException("Este docente não é professor do curso que o aluno está matriculado");
+            throw new UsuarioIncompativelException("Este docente não é professor do curso que o aluno está matriculado");
         }
 
         // Obtém o nome do curso do aluno a partir do nome do aluno
@@ -55,16 +61,16 @@ public class NotaServiceImpl implements NotaService {
 
         // Verifica se a matéria corresponde ao curso do aluno
         boolean materiaDoCurso = turmaRepository.existsByNomeCursoNomeAndNomeCursoMateriasNome(
-                nomeCurso, notaRequest.nomeMateria());
+                nomeCurso, notaRequest.nomeMateria().toUpperCase());
         if (!materiaDoCurso) {
-            throw new RuntimeException("Esta matéria não corresponde ao curso do aluno");
+            throw new BadRequestException("Esta matéria não corresponde ao curso do aluno");
         }
 
         NotaEntity nota = new NotaEntity();
         nota.setNomeAluno(aluno);
         nota.setNomeProfessor(docente);
-        nota.setNomeMateria(materiaRepository.findByNome(notaRequest.nomeMateria())
-                .orElseThrow(() -> new RuntimeException("Não há matéria cadastrada com este nome!")));
+        nota.setNomeMateria(materiaRepository.findByNome(notaRequest.nomeMateria().toUpperCase())
+                .orElseThrow(() -> new NotFoundException("Não há matéria cadastrada com este nome!")));
         nota.setValor(notaRequest.valor());
         nota.setData(notaRequest.data());
 
@@ -74,7 +80,7 @@ public class NotaServiceImpl implements NotaService {
     }
 
      public NotaEntity notaPorId(Long id){
-        NotaEntity notaPesquisada = notaRepository.findById(id).orElseThrow(() -> new RuntimeException("Id não correspondente a nenhuma nota cadastrada"));
+        NotaEntity notaPesquisada = notaRepository.findById(id).orElseThrow(() -> new NotFoundException("Id não correspondente a nenhuma nota cadastrada"));
         return notaPesquisada;
     }
 
@@ -88,20 +94,24 @@ public class NotaServiceImpl implements NotaService {
     @Override
     public NotaResponse atualizarNota(Long id, NotaRequest notaRequest, String token) {
 
+        if(notaRequest.nomeAluno() == null || notaRequest.nomeProfessor() == null || notaRequest.nomeMateria() == null || notaRequest.data() == null){
+            throw new CampoAusenteException("Os campos nomeAluno, nomeProfessor, nomeMateria, valor e data são obrigatórios!");
+        }
+
         papelUsuarioAcessoPermitido(token);
 
         NotaEntity notaPesquisada = notaPorId(id);
 
-        DocenteEntity docente = docenteRepository.findByNome(notaRequest.nomeProfessor()).orElseThrow(() -> new RuntimeException("Este professor não existe ou ainda não está cadastrado como um docente"));
+        DocenteEntity docente = docenteRepository.findByNome(notaRequest.nomeProfessor().toUpperCase()).orElseThrow(() -> new NotFoundException("Este professor não existe ou ainda não está cadastrado como um docente"));
 
-        AlunoEntity aluno = alunoRepository.findByNome(notaRequest.nomeAluno())
-                .orElseThrow(() -> new RuntimeException("Não há aluno cadastrado com este nome!"));
+        AlunoEntity aluno = alunoRepository.findByNome(notaRequest.nomeAluno().toUpperCase())
+                .orElseThrow(() -> new NotFoundException("Não há aluno cadastrado com este nome!"));
 
         boolean professorAssociadoTurma = turmaRepository.existsByNomeProfessorNomeAndAlunosNome(
-                notaRequest.nomeProfessor(), notaRequest.nomeAluno());
+                notaRequest.nomeProfessor().toUpperCase(), notaRequest.nomeAluno().toUpperCase());
 
         if (!professorAssociadoTurma) {
-            throw new RuntimeException("Este docente não é professor do curso que o aluno está matriculado");
+            throw new BadRequestException("Este docente não é professor do curso que o aluno está matriculado");
         }
 
         // Obtém o nome do curso do aluno a partir do nome do aluno
@@ -109,15 +119,15 @@ public class NotaServiceImpl implements NotaService {
 
         // Verifica se a matéria corresponde ao curso do aluno
         boolean materiaDoCurso = turmaRepository.existsByNomeCursoNomeAndNomeCursoMateriasNome(
-                nomeCurso, notaRequest.nomeMateria());
+                nomeCurso, notaRequest.nomeMateria().toUpperCase());
         if (!materiaDoCurso) {
-            throw new RuntimeException("Esta matéria não corresponde ao curso do aluno");
+            throw new BadRequestException("Esta matéria não corresponde ao curso do aluno");
         }
 
         notaPesquisada.setId(id);
         notaPesquisada.setNomeAluno(aluno);
         notaPesquisada.setNomeProfessor(docente);
-        notaPesquisada.setNomeMateria(materiaRepository.findByNome(notaRequest.nomeMateria()).orElseThrow(() -> new RuntimeException("Não há matéria cadastrada com este nome!")));
+        notaPesquisada.setNomeMateria(materiaRepository.findByNome(notaRequest.nomeMateria().toUpperCase()).orElseThrow(() -> new NotFoundException("Não há matéria cadastrada com este nome!")));
         notaPesquisada.setValor(notaRequest.valor());
         notaPesquisada.setData(notaRequest.data());
 
@@ -132,7 +142,7 @@ public class NotaServiceImpl implements NotaService {
         String nomePapel = tokenService.buscaCampo(token, "scope");
 
         if(!Objects.equals(nomePapel, "ADM")){
-            throw new RuntimeException("Apenas administradores podem podem excluir nota!");
+            throw new AcessoNaoAutorizadoException("Apenas administradores podem podem excluir nota!");
         }
 
         NotaEntity notaPesquisada = notaPorId(id);

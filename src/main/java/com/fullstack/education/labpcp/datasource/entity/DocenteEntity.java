@@ -16,6 +16,7 @@ public class DocenteEntity {
     @Column(name = "docente_id")
     private Long id;
 
+    @Column(unique = true)
     private String nome;
 
     private LocalDate data_entrada;

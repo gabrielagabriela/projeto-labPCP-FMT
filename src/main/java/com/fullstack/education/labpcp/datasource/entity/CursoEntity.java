@@ -15,6 +15,7 @@ public class CursoEntity {
     @Column(name = "curso_id")
     private Long id;
 
+    @Column(unique = true)
     private String nome;
 
     @OneToMany(mappedBy = "nomeCurso", fetch = FetchType.EAGER)
@@ -22,6 +23,4 @@ public class CursoEntity {
 
     @OneToMany(mappedBy = "nomeCurso", fetch = FetchType.EAGER)
     private List<MateriaEntity> materias;
-
-
 }
