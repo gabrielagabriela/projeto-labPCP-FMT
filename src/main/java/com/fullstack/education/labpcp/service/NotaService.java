@@ -9,9 +9,13 @@ import java.util.List;
 public interface NotaService {
 
     NotaResponse criarNota(@RequestBody NotaRequest notaRequest, String token);
+
     NotaResponse obterNotaPorId(Long id, String token);
+
     NotaResponse atualizarNota(Long id, @RequestBody NotaRequest notaRequest, String token);
+
     void excluirNota(Long id, String token);
+
     List<NotaResponse> listarTodasNotas(String token);
 }
 

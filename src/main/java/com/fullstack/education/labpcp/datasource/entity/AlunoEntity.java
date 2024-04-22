@@ -30,7 +30,7 @@ public class AlunoEntity {
     private TurmaEntity nomeTurma;
 
 
-    @OneToMany(mappedBy = "nomeAluno", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "nomeAluno", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<NotaEntity> notas;
 
 

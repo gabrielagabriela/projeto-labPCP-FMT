@@ -1,4 +1,4 @@
-package com.fullstack.education.labpcp.service.serviceImpl;
+package com.fullstack.education.labpcp.infra.inicializacao;
 
 import com.fullstack.education.labpcp.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
@@ -14,16 +14,14 @@ public class InicializacaoSistema implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        // Verifica se já existem usuários cadastrados
         if (!usuarioService.existeUsuariosCadastrados()) {
-            // Se não existirem, cadastra os usuários pré-definidos
             cadastrarUsuariosPredefinidos();
         }
     }
 
     private void cadastrarUsuariosPredefinidos() {
-        // Cadastra os usuários pré-definidos
         usuarioService.cadastrarUsuarioPreDefinido("admin", "admin", "ADM");
+        usuarioService.cadastrarUsuarioPreDefinido("admin2", "admin2", "ADM");
     }
 
 }

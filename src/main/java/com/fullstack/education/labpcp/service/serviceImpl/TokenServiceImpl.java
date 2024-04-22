@@ -4,9 +4,9 @@ import com.fullstack.education.labpcp.controller.dto.request.LoginRequest;
 import com.fullstack.education.labpcp.controller.dto.response.LoginResponse;
 import com.fullstack.education.labpcp.datasource.entity.UsuarioEntity;
 import com.fullstack.education.labpcp.datasource.repository.UsuarioRepository;
-import com.fullstack.education.labpcp.infra.exception.BadRequestException;
-import com.fullstack.education.labpcp.infra.exception.CampoAusenteException;
-import com.fullstack.education.labpcp.infra.exception.NotFoundException;
+import com.fullstack.education.labpcp.infra.exception.customException.BadRequestException;
+import com.fullstack.education.labpcp.infra.exception.customException.CampoAusenteException;
+import com.fullstack.education.labpcp.infra.exception.customException.NotFoundException;
 import com.fullstack.education.labpcp.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,6 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.Instant;
 

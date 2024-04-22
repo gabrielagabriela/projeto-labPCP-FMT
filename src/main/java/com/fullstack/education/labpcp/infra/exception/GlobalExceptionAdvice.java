@@ -2,11 +2,11 @@ package com.fullstack.education.labpcp.infra.exception;
 
 
 import com.fullstack.education.labpcp.controller.dto.response.ErroResponse;
+import com.fullstack.education.labpcp.infra.exception.customException.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.client.HttpClientErrorException;
 
 @Slf4j
 @ControllerAdvice
@@ -60,6 +60,7 @@ public class GlobalExceptionAdvice {
         log.error("STATUS: 400 -> Campo ausente -> {}", e.getMessage());
         return ResponseEntity.status(400).body(erro);
     }
+
     @ExceptionHandler(UsuarioIncompativelException.class)
     public ResponseEntity<?> handler(UsuarioIncompativelException e) {
         ErroResponse erro = ErroResponse.builder()

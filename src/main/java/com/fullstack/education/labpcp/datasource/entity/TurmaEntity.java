@@ -2,6 +2,7 @@ package com.fullstack.education.labpcp.datasource.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.util.List;
 
 @Data
@@ -25,10 +26,7 @@ public class TurmaEntity {
     @JoinColumn(name = "curso_id")
     private CursoEntity nomeCurso;
 
-
-    @OneToMany(mappedBy = "nomeTurma", fetch = FetchType.EAGER) // nome do atributo turma na classe aluno
+    @OneToMany(mappedBy = "nomeTurma", fetch = FetchType.EAGER)
     private List<AlunoEntity> alunos;
-
-
 
 }

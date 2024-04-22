@@ -8,8 +8,12 @@ import java.util.List;
 
 public interface DocenteService {
     DocenteResponse criarDocente(@RequestBody DocenteRequest docenteRequest, String token);
+
     DocenteResponse obterDocentePorId(Long id, String token);
-    DocenteResponse atualizarDocente(Long id,@RequestBody DocenteRequest docenteRequest, String token);
+
+    DocenteResponse atualizarDocente(Long id, @RequestBody DocenteRequest docenteRequest, String token);
+
     void excluirDocente(Long id, String token);
+
     List<DocenteResponse> listarTodosDocentes(String token);
 }

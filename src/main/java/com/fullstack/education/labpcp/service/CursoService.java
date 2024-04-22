@@ -10,9 +10,13 @@ import java.util.List;
 public interface CursoService {
 
     CursoResponse criarCurso(@RequestBody CursoRequest cursoRequest, String token);
+
     CursoResponse obterCursoPorId(Long id, String token);
+
     CursoResponse atualizarCurso(Long id, @RequestBody CursoRequest cursoRequest, String token);
+
     void excluirCurso(Long id, String token);
+
     List<CursoResponse> listarTodosCursos(String token);
 
     List<CursoListaMateriaResponse> listarMateriasPorCurso(Long id, String token);

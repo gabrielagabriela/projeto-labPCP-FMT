@@ -27,7 +27,6 @@ public class DocenteController {
         return ResponseEntity.status(HttpStatus.OK).body(docenteService.obterDocentePorId(id, token.substring(7)));
     }
 
-    //////////////novo - testar
     @PutMapping("{id}")
     public ResponseEntity<DocenteResponse> atualizarDocente(@PathVariable Long id, @RequestHeader(name = "Authorization" )String token, @RequestBody DocenteRequest docenteRequest){
         return ResponseEntity.status(HttpStatus.OK).body(docenteService.atualizarDocente(id, docenteRequest,token.substring(7) ));
