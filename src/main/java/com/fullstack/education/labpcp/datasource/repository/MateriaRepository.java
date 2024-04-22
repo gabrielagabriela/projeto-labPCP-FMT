@@ -8,11 +8,7 @@ import java.util.Optional;
 
 public interface MateriaRepository extends JpaRepository<MateriaEntity, Long> {
     Optional<MateriaEntity> findByNome(String nome);
-    //boolean existsByNomeAndNomeCurso(String nomeMateria, String nomeCurso);
-    //boolean existsByNomeAndNomeCurso(String nomeMateria, String nomeCurso);
-
     boolean existsByNomeAndNomeCurso(String nomeMateria, CursoEntity curso);
-
 
 
 }

@@ -13,6 +13,7 @@ public class MateriaEntity {
     @Column(name = "materia_id")
     private Long id;
 
+    @Column(unique = true)
     private String nome;
 
     @ManyToOne

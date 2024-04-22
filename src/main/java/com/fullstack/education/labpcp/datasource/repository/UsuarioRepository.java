@@ -9,4 +9,5 @@ public interface UsuarioRepository extends JpaRepository<UsuarioEntity, Long> {
     Optional<UsuarioEntity> findByLogin(String login);
     boolean existsByLoginAndPapelNome(String login, String nomePapel);
 
+
 }

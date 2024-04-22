@@ -4,6 +4,9 @@ import com.fullstack.education.labpcp.controller.dto.request.LoginRequest;
 import com.fullstack.education.labpcp.controller.dto.response.LoginResponse;
 import com.fullstack.education.labpcp.datasource.entity.UsuarioEntity;
 import com.fullstack.education.labpcp.datasource.repository.UsuarioRepository;
+import com.fullstack.education.labpcp.infra.exception.BadRequestException;
+import com.fullstack.education.labpcp.infra.exception.CampoAusenteException;
+import com.fullstack.education.labpcp.infra.exception.NotFoundException;
 import com.fullstack.education.labpcp.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +17,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.Instant;
 
@@ -32,11 +36,15 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public LoginResponse tokenLogin(@RequestBody LoginRequest loginRequest) {
 
-        UsuarioEntity usuarioEntity = usuarioRepository.findByLogin(loginRequest.login()).orElseThrow(() -> {log.error("Erro, usuário não existe"); return new RuntimeException("Este login não existe!");});
+        if(loginRequest.login() == null || loginRequest.senha() == null){
+            throw new CampoAusenteException("Os campos login e senha são obrigatórios");
+        }
+
+        UsuarioEntity usuarioEntity = usuarioRepository.findByLogin(loginRequest.login()).orElseThrow(() -> {log.error("Erro, usuário não existe"); return new NotFoundException("Este login não existe!");});
 
 
         if(!usuarioEntity.senhaCorreta(loginRequest, bCryptEncoder)){
-            throw new RuntimeException("Erro! Senha incorreta, tente novamente.");
+            throw new BadRequestException("Erro! Senha incorreta, tente novamente.");
         }
 
         Instant now = Instant.now();

@@ -11,4 +11,11 @@ public interface TurmaRepository extends JpaRepository<TurmaEntity, Long> {
     boolean existsByNomeProfessorNomeAndAlunosNome(String nomeProfessor, String nomeAluno);
 
     boolean existsByNomeCursoNomeAndNomeCursoMateriasNome(String nomeCurso, String nomeMateria);
+
+    boolean existsByNomeProfessorNome(String nomeProfessor);
+
+    boolean existsByNomeCursoNome(String nomeCurso);
+
+
+
 }

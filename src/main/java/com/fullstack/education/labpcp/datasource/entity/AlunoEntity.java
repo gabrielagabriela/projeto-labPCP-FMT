@@ -16,6 +16,7 @@ public class AlunoEntity {
     @Column(name = "aluno_id")
     private Long id;
 
+    @Column(unique = true)
     private String nome;
 
     private LocalDate data_nascimento;

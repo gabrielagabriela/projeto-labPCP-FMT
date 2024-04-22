@@ -14,14 +14,10 @@ public interface DocenteRepository extends JpaRepository<DocenteEntity, Long> {
 
     List<DocenteEntity> findAllByLoginPapelNome(String nomePapel);
 
-    // boolean existsByLoginAndPapelNome(String login, String nomePapel);
-    //boolean existsByNomeAndPapelNome(String nome, String nomePapel);
     boolean existsByNomeAndLoginPapelNome(String nome, String nomePapel);
 
-    //boolean existsByNomeAndTurmaNomeProfessorNome(String nomeProfessor, String nomeProfessorTurma);
-
-    //boolean usuarioProfessor = docenteRepository.existsByNomeAndLoginPapelNome(turmaRequest.nomeProfessor(), "PROFESSOR");
-
     Optional<DocenteEntity> findByNome(String nome);
+
+    boolean existsByLoginLogin(String login);
 
 }
