@@ -6,7 +6,7 @@ import com.fullstack.education.labpcp.datasource.entity.AlunoEntity;
 import com.fullstack.education.labpcp.datasource.entity.DocenteEntity;
 import com.fullstack.education.labpcp.datasource.entity.NotaEntity;
 import com.fullstack.education.labpcp.datasource.repository.*;
-import com.fullstack.education.labpcp.infra.exception.*;
+import com.fullstack.education.labpcp.infra.exception.customException.*;
 import com.fullstack.education.labpcp.service.NotaService;
 import com.fullstack.education.labpcp.service.TokenService;
 import lombok.RequiredArgsConstructor;
@@ -137,6 +137,7 @@ public class NotaServiceImpl implements NotaService {
         return new NotaResponse(notaPesquisada.getId(), notaPesquisada.getNomeAluno().getNome(), notaPesquisada.getNomeProfessor().getNome(), notaPesquisada.getNomeMateria().getNome(), notaPesquisada.getValor(), notaPesquisada.getData());
     }
 
+
     @Override
     public void excluirNota(Long id, String token) {
 
@@ -158,8 +159,13 @@ public class NotaServiceImpl implements NotaService {
         papelUsuarioAcessoPermitido(token);
 
         log.info("Lista com todas as notas cadastradas no sistema");
-        return notaRepository.findAll().stream().map(
-                n -> new NotaResponse(n.getId(), n.getNomeAluno().getNome(), n.getNomeProfessor().getNome(), n.getNomeMateria().getNome(), n.getValor(), n.getData())
-        ).toList();
+        return notaRepository.findAll().stream().map(n -> {
+            String nomeAluno = (n.getNomeAluno() != null) ? n.getNomeAluno().getNome() : null;
+            String nomeProfessor = (n.getNomeProfessor() != null) ? n.getNomeProfessor().getNome() : null;
+            String nomeMateria = (n.getNomeMateria() != null) ? n.getNomeMateria().getNome() : null;
+
+            return new NotaResponse(n.getId(), nomeAluno, nomeProfessor, nomeMateria, n.getValor(), n.getData());
+        }).toList();
     }
+
 }

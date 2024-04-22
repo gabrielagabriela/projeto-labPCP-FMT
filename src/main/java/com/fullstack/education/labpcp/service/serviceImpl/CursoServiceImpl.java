@@ -6,8 +6,9 @@ import com.fullstack.education.labpcp.controller.dto.response.CursoResponse;
 import com.fullstack.education.labpcp.datasource.entity.CursoEntity;
 import com.fullstack.education.labpcp.datasource.entity.MateriaEntity;
 import com.fullstack.education.labpcp.datasource.repository.CursoRepository;
+import com.fullstack.education.labpcp.datasource.repository.MateriaRepository;
 import com.fullstack.education.labpcp.datasource.repository.TurmaRepository;
-import com.fullstack.education.labpcp.infra.exception.*;
+import com.fullstack.education.labpcp.infra.exception.customException.*;
 import com.fullstack.education.labpcp.service.CursoService;
 import com.fullstack.education.labpcp.service.TokenService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class CursoServiceImpl implements CursoService {
     private final CursoRepository cursoRepository;
     private final TokenService tokenService;
     private final TurmaRepository turmaRepository;
+    private final MateriaRepository materiaRepository;
 
     public void papelUsuarioAcessoPermitido(String token) {
 
@@ -108,9 +110,14 @@ public class CursoServiceImpl implements CursoService {
         CursoEntity cursoPesquisado = cursoPorId(id);
         String nomeCursoPesquisado = cursoPesquisado.getNome();
         boolean cursoAssociadoAUmaTurma = turmaRepository.existsByNomeCursoNome(nomeCursoPesquisado);
-        if (cursoAssociadoAUmaTurma) {
-            throw new BadRequestException("Este curso está associado a pelo menos uma turma, indique outro curso a turma antes de deleta-lo!");
+        boolean cursoAssociadoAUmaMateria = materiaRepository.existsByNomeCursoNome(nomeCursoPesquisado);
+        if (cursoAssociadoAUmaTurma ) {
+            throw new BadRequestException("Este curso está associado a uma pelo menos uma turma, indique outro curso a turma antes de deleta-lo!");
         }
+        if (cursoAssociadoAUmaMateria ) {
+            throw new BadRequestException("Este curso está associado a uma matéria, indique outro curso a matéria antes de deleta-lo!");
+        }
+
         log.info("Curso excluido por ID");
         cursoRepository.delete(cursoPesquisado);
 

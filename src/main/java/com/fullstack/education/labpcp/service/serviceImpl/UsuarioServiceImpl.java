@@ -6,10 +6,10 @@ import com.fullstack.education.labpcp.controller.dto.response.CadastroUsuarioRes
 import com.fullstack.education.labpcp.datasource.entity.UsuarioEntity;
 import com.fullstack.education.labpcp.datasource.repository.PapelRepository;
 import com.fullstack.education.labpcp.datasource.repository.UsuarioRepository;
-import com.fullstack.education.labpcp.infra.exception.AcessoNaoAutorizadoException;
-import com.fullstack.education.labpcp.infra.exception.CampoAusenteException;
-import com.fullstack.education.labpcp.infra.exception.NotFoundException;
-import com.fullstack.education.labpcp.infra.exception.RegistroExistenteException;
+import com.fullstack.education.labpcp.infra.exception.customException.AcessoNaoAutorizadoException;
+import com.fullstack.education.labpcp.infra.exception.customException.CampoAusenteException;
+import com.fullstack.education.labpcp.infra.exception.customException.NotFoundException;
+import com.fullstack.education.labpcp.infra.exception.customException.RegistroExistenteException;
 import com.fullstack.education.labpcp.service.TokenService;
 import com.fullstack.education.labpcp.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
@@ -63,7 +63,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public boolean existeUsuariosCadastrados() {
-        return usuarioRepository.count() > 0;
+        return usuarioRepository.existsByPapelNome("ADM");
     }
 
     @Override

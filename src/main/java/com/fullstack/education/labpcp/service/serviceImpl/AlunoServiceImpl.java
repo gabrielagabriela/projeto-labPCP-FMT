@@ -9,10 +9,10 @@ import com.fullstack.education.labpcp.datasource.entity.NotaEntity;
 import com.fullstack.education.labpcp.datasource.repository.AlunoRepository;
 import com.fullstack.education.labpcp.datasource.repository.TurmaRepository;
 import com.fullstack.education.labpcp.datasource.repository.UsuarioRepository;
-import com.fullstack.education.labpcp.infra.exception.AcessoNaoAutorizadoException;
-import com.fullstack.education.labpcp.infra.exception.NotFoundException;
-import com.fullstack.education.labpcp.infra.exception.RegistroExistenteException;
-import com.fullstack.education.labpcp.infra.exception.UsuarioIncompativelException;
+import com.fullstack.education.labpcp.infra.exception.customException.AcessoNaoAutorizadoException;
+import com.fullstack.education.labpcp.infra.exception.customException.NotFoundException;
+import com.fullstack.education.labpcp.infra.exception.customException.RegistroExistenteException;
+import com.fullstack.education.labpcp.infra.exception.customException.UsuarioIncompativelException;
 import com.fullstack.education.labpcp.service.AlunoService;
 import com.fullstack.education.labpcp.service.TokenService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.text.DecimalFormat;
 import java.util.Optional;
 
 @Service
@@ -36,6 +35,7 @@ public class AlunoServiceImpl implements AlunoService {
     private final TurmaRepository turmaRepository;
 
 
+    @Override
     public void papelUsuarioAcessoPermitido(String token) {
 
         String nomePapel = tokenService.buscaCampo(token, "scope");
@@ -193,9 +193,13 @@ public class AlunoServiceImpl implements AlunoService {
         }
         List<NotaEntity> notas = alunoPesquisado.getNotas();
         log.info("Retorno das notas do aluno com sucesso!");
-        return notas.stream().map(
-                n -> new NotaResponse(n.getId(), n.getNomeAluno().getNome(), n.getNomeProfessor().getNome(), n.getNomeMateria().getNome(), n.getValor(), n.getData())
-        ).toList();
+        return notas.stream().map(n -> {
+            String nomeAluno = (n.getNomeAluno() != null) ? n.getNomeAluno().getNome() : null;
+            String nomeProfessor = (n.getNomeProfessor() != null) ? n.getNomeProfessor().getNome() : null;
+            String nomeMateria = (n.getNomeMateria() != null) ? n.getNomeMateria().getNome() : null;
+
+            return new NotaResponse(n.getId(), nomeAluno, nomeProfessor, nomeMateria, n.getValor(), n.getData());
+        }).toList();
     }
 
     @Override

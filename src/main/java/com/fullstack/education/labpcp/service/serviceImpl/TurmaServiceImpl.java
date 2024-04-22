@@ -7,7 +7,7 @@ import com.fullstack.education.labpcp.datasource.entity.TurmaEntity;
 import com.fullstack.education.labpcp.datasource.repository.CursoRepository;
 import com.fullstack.education.labpcp.datasource.repository.DocenteRepository;
 import com.fullstack.education.labpcp.datasource.repository.TurmaRepository;
-import com.fullstack.education.labpcp.infra.exception.*;
+import com.fullstack.education.labpcp.infra.exception.customException.*;
 import com.fullstack.education.labpcp.service.TurmaService;
 import com.fullstack.education.labpcp.service.TokenService;
 import lombok.RequiredArgsConstructor;

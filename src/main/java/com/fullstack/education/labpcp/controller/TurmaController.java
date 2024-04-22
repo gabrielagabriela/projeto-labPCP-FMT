@@ -1,8 +1,6 @@
 package com.fullstack.education.labpcp.controller;
 
 import com.fullstack.education.labpcp.controller.dto.request.TurmaRequest;
-import com.fullstack.education.labpcp.controller.dto.request.TurmaRequest;
-import com.fullstack.education.labpcp.controller.dto.response.TurmaResponse;
 import com.fullstack.education.labpcp.controller.dto.response.TurmaResponse;
 import com.fullstack.education.labpcp.service.TurmaService;
 import lombok.RequiredArgsConstructor;

@@ -6,7 +6,7 @@ import com.fullstack.education.labpcp.datasource.entity.DocenteEntity;
 import com.fullstack.education.labpcp.datasource.repository.DocenteRepository;
 import com.fullstack.education.labpcp.datasource.repository.TurmaRepository;
 import com.fullstack.education.labpcp.datasource.repository.UsuarioRepository;
-import com.fullstack.education.labpcp.infra.exception.*;
+import com.fullstack.education.labpcp.infra.exception.customException.*;
 import com.fullstack.education.labpcp.service.DocenteService;
 import com.fullstack.education.labpcp.service.TokenService;
 import lombok.RequiredArgsConstructor;
@@ -189,13 +189,13 @@ public class DocenteServiceImpl implements DocenteService {
 
             log.info("Busca da lista com todos os docentes de papel 'professor' cadastrados");
             return docentes.stream().map(
-                    d -> new DocenteResponse(d.getId(), d.getNome(), d.getData_entrada(), d.getLogin().getLogin())
+                    d -> new DocenteResponse(d.getId(), d.getNome(), d.getData_entrada(), (d.getLogin() != null) ? d.getLogin().getLogin() : null)
             ).toList();
         }
 
         log.info("Busca da lista com todos os docentes cadastrados");
         return docenteRepository.findAll().stream().map(
-                d -> new DocenteResponse(d.getId(), d.getNome(), d.getData_entrada(), d.getLogin().getLogin())
+                d -> new DocenteResponse(d.getId(), d.getNome(), d.getData_entrada(), (d.getLogin() != null) ? d.getLogin().getLogin() : null)
         ).toList();
     }
 }

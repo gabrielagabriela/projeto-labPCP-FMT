@@ -23,7 +23,6 @@ public class NotaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(notaService.criarNota(notaRequest, token.substring(7)));
     }
 
-
     @GetMapping("{id}")
     public ResponseEntity<NotaResponse> buscarNotaPorId(@PathVariable Long id, @RequestHeader(name = "Authorization") String token ){
         return ResponseEntity.status(HttpStatus.OK).body(notaService.obterNotaPorId(id, token.substring(7)));

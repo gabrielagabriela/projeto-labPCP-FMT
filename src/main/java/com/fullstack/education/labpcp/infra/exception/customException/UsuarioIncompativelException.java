@@ -1,4 +1,4 @@
-package com.fullstack.education.labpcp.infra.exception;
+package com.fullstack.education.labpcp.infra.exception.customException;
 
 public class UsuarioIncompativelException extends RuntimeException{
     public UsuarioIncompativelException() {
