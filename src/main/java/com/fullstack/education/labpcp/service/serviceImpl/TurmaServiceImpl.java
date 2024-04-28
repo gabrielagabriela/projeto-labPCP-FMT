@@ -1,7 +1,9 @@
 package com.fullstack.education.labpcp.service.serviceImpl;
 
 import com.fullstack.education.labpcp.controller.dto.request.TurmaRequest;
+import com.fullstack.education.labpcp.controller.dto.response.TurmaComListAlunosResponse;
 import com.fullstack.education.labpcp.controller.dto.response.TurmaResponse;
+import com.fullstack.education.labpcp.datasource.entity.AlunoEntity;
 import com.fullstack.education.labpcp.datasource.entity.DocenteEntity;
 import com.fullstack.education.labpcp.datasource.entity.TurmaEntity;
 import com.fullstack.education.labpcp.datasource.repository.CursoRepository;
@@ -14,9 +16,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -79,12 +83,25 @@ public class TurmaServiceImpl implements TurmaService {
     }
 
     @Override
-    public TurmaResponse obterTurmaPorId(Long id, String token) {
+    public TurmaComListAlunosResponse obterTurmaPorId(Long id, String token) {
         papelUsuarioAcessoPermitido(token);
         TurmaEntity turmaPesquisada = turmaPorId(id);
+
+        List<String> alunos = new ArrayList<>();
+        for (AlunoEntity aluno : turmaPesquisada.getAlunos()) {
+            alunos.add(aluno.getNome());
+        }
         log.info("Busca de uma turma pelo seu ID");
-        return new TurmaResponse(turmaPesquisada.getId(), turmaPesquisada.getNome(), turmaPesquisada.getNomeProfessor().getNome(), turmaPesquisada.getNomeCurso().getNome());
+
+        return new TurmaComListAlunosResponse(
+                turmaPesquisada.getId(),
+                turmaPesquisada.getNome(),
+                turmaPesquisada.getNomeProfessor().getNome(),
+                turmaPesquisada.getNomeCurso().getNome(),
+                alunos
+        );
     }
+
 
     @Override
     public TurmaResponse atualizarTurma(Long id, TurmaRequest turmaRequest, String token) {
@@ -143,20 +160,32 @@ public class TurmaServiceImpl implements TurmaService {
 
         TurmaEntity turmaPesquisada = turmaPorId(id);
 
+        if (!turmaPesquisada.getAlunos().isEmpty()) {
+            throw new BadRequestException("Não é possível excluir a turma porque há alunos matriculados nela!");
+        }
+
         log.info("Exclusão de uma turma pelo seu ID");
         turmaRepository.delete(turmaPesquisada);
     }
 
     @Override
-    public List<TurmaResponse> listarTodosTurmas(String token) {
+    public List<TurmaComListAlunosResponse> listarTodosTurmas(String token) {
+
         papelUsuarioAcessoPermitido(token);
 
         log.info("Lista com todas as turmas cadastradas no sistema");
+
         return turmaRepository.findAll().stream().map(turma -> {
             String nomeProfessor = turma.getNomeProfessor() != null ? turma.getNomeProfessor().getNome() : null;
             String nomeCurso = turma.getNomeCurso() != null ? turma.getNomeCurso().getNome() : null;
 
-            return new TurmaResponse(turma.getId(), turma.getNome(), nomeProfessor, nomeCurso);
+            List<String> alunos = new ArrayList<>();
+            for (AlunoEntity aluno : turma.getAlunos()) {
+                alunos.add(aluno.getNome());
+            }
+
+            return new TurmaComListAlunosResponse(turma.getId(), turma.getNome(), nomeProfessor, nomeCurso, alunos);
         }).toList();
     }
 }
+
