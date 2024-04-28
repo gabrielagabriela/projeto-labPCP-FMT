@@ -1,6 +1,7 @@
 package com.fullstack.education.labpcp.controller;
 
 import com.fullstack.education.labpcp.controller.dto.request.TurmaRequest;
+import com.fullstack.education.labpcp.controller.dto.response.TurmaComListAlunosResponse;
 import com.fullstack.education.labpcp.controller.dto.response.TurmaResponse;
 import com.fullstack.education.labpcp.service.TurmaService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class TurmaController {
 
 
     @GetMapping("{id}")
-    public ResponseEntity<TurmaResponse> buscarTurmaPorId(@PathVariable Long id, @RequestHeader(name = "Authorization") String token ){
+    public ResponseEntity<TurmaComListAlunosResponse> buscarTurmaPorId(@PathVariable Long id, @RequestHeader(name = "Authorization") String token ){
         return ResponseEntity.status(HttpStatus.OK).body(turmaService.obterTurmaPorId(id, token.substring(7)));
     }
 
@@ -40,7 +41,7 @@ public class TurmaController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<TurmaResponse>> listarTurmas(@RequestHeader(name = "Authorization" ) String token){
+    public ResponseEntity<List<TurmaComListAlunosResponse>> listarTurmas(@RequestHeader(name = "Authorization" ) String token){
         return ResponseEntity.status(HttpStatus.OK).body(turmaService.listarTodosTurmas( token.substring(7)));
     }
 }

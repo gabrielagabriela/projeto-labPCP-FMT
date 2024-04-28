@@ -189,7 +189,7 @@ Exemplo de envio como JSON:
 ```
 {
 	"nome": "Turma 3",
-	"nomeProfessor": "anapaula",
+	"nomeProfessor": "Ana Paula Maria",
 	"nomeCurso": "javascript"
 }
 
@@ -212,7 +212,7 @@ Exemplo de envio como JSON:
 ```
 {
 	"nome": "Turma 33",
-	"nomeProfessor": "anapaula",
+	"nomeProfessor": "Ana Paula Maria",
 	"nomeCurso": "javascript"
 }
 
